@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  mysql:
+    build:
+      context: .
+      dockerfile: DockerFile
+    container_name: veterinary_mysql
+    restart: always
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    container_name: veterinary_app
+    restart: always
+    depends_on:
+      - mysql
+    ports:
+      - "8180:8180"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/veterinary_system
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: veterinary_jenkins
+    restart: always
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_data:/var/jenkins_home
+
+volumes:
+  mysql_data:
+  jenkins_data:
